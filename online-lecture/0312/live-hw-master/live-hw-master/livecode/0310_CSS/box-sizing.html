@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    div {
+      /* 기본 div의
+        box-sizing은
+        content-box 입니다.
+       */
+      width: 100px;
+      margin: 10px auto;
+      padding: 20px;
+      border: 1px solid black;
+      background-color: #9775fa;
+      color: white;
+      text-align: center;
+    }
+
+    .border-box {
+      box-sizing: border-box;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>box-sizing을 알아봅시다.</h1>
+  <li>기본 box-sizing 값은 content-box이며, 이때 너비(width)는 컨텐츠 영역입니다.</li>
+  <div>content-box</div>
+  <li>border-box로 값을 변경하면, 이때 너비(width)는 border+padding+컨텐츠 영역입니다.</li>
+  <div class="border-box">border-box</div>
+</body>
+</html>

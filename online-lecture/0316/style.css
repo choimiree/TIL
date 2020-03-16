@@ -1,0 +1,15 @@
+/* 아래의 코드는 별도의 수정이 필요 없습니다. */
+form {
+  width: 400px;
+  padding: 1rem;
+  border: 1px solid black;
+}
+
+.form-input {
+  margin: 1rem 0;
+}
+
+label {
+  display: inline-block;
+  width: 25%;
+}

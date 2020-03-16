@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    div {
+      box-sizing: border-box;
+      width: 100px;
+      height: 100px;
+      border: 1px solid black;
+      background-color: #9775fa;
+      color: white;
+    }
+    .inline {
+      display: inline;
+    }
+    .inline-block {
+      display: inline-block;
+    }
+    .float-left {
+      float: left;
+      background: pink;
+    }
+    .float-right {
+      float: right;
+      background: powderblue;
+    }
+    .clear {
+      clear: both;
+    }
+    .clear-pseudo::after {
+      display: block;
+      content: "";
+      clear: both;
+    }
+  </style>
+</head>
+<body>
+  <h1>Float</h1>
+  <!-- 1. -->
+  <section>
+    <h2>일반적인 흐름</h2>
+    <p>일반적으로 위에서부터 아래로 하나씩 배치된다.</p>
+    <h3>Block</h3>
+    <div>Block 1</div>
+    <div>Bolck 2</div>
+    <hr>
+    <h3>Inline</h3>
+    <div class="inline">Inline 1</div>
+    <div class="inline">Inline 2</div>
+    <hr>
+    <h3>Inline block</h3>
+    <div class="inline-block">inline-block 1</div>
+    <div class="inline-block">inline-block 2</div>
+  </section>
+
+  <!-- 2. -->
+  <h2>Float</h2>
+  <div class="float-left">좌1</div>
+  <div class="float-right">우1</div>
+  <div class="clear">그냥 있고 싶음</div>
+
+  <!-- 3. -->
+  <section class="">
+    <h2>Float II</h2>
+    <div class="float-left">좌1</div>
+    <div class="float-right">우1</div>
+    <div class="float-left">좌2</div>
+    <div class="float-right">우2</div>
+  </section>
+
+  <!-- 주석의 방법은 그래도 부유된 상태 -->
+  <!-- <h2 class="clear">다음 내용</h2> -->
+</body>
+</html>

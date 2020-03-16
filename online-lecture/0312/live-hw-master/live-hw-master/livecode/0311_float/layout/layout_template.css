@@ -1,0 +1,31 @@
+/* Reset browser default value */
+body {
+  margin: 0;
+}
+div, header, section, nav, article, footer {
+  box-sizing: border-box;
+}
+
+/* Default style */
+header {
+  height: 100px;
+  background-color: bisque;
+}
+
+nav {
+  width: 10vw;
+  background-color: powderblue;
+}
+
+section {
+  width: 90vw;
+  background-color: rosybrown;
+}
+
+article {
+  border: 1px solid black;
+}
+
+footer {
+  background-color: silver;
+}

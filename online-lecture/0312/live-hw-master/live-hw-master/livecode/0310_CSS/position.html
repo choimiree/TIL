@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    div {
+      box-sizing: border-box;
+      height: 100px;
+      width: 100px;
+      text-align: center;
+    }
+    .parent{
+      position: relative;
+      height: 300px;
+      width: 300px;
+      border: 1px solid black;
+    }
+    .absolute {
+      position: absolute;
+      top: 100px;
+      background: #9775fa;
+    }
+    .relative {
+      position: relative;
+      top: 100px;
+      background: #9775fa;
+    }
+    .sibling {
+      width: 200px;
+      background: #7048e8;
+    }
+  </style>
+</head>
+<body>
+  <div class="parent">
+    <div class="absolute">형</div>
+    <div class="sibling">동생</div>
+  </div>
+  <div class="parent">
+    <div class="relative">형</div>
+    <div class="sibling">동생</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* 공통 css 가독성을 위해 section 구분, div 상하 마진 부여 */
+    section {
+      border-bottom: 1px dashed black;
+    }
+
+    div {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .w-100 {
+      width: 100px;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+
+    /* section2 활용 CSS*/
+    .div-bg {
+      background-color: orange;
+    }
+
+    .square {
+      box-sizing: border-box;
+      width: 200px;
+      height: 200px;
+      border: 1px solid black;
+      background-color: #9775fa;
+      color: white;
+    }
+    .margin-left-auto {
+      margin-left: auto;
+    }
+    .margin-right-auto {
+      margin-right: auto;
+    }
+
+    /* section3 활용 css */
+    .span-bg {
+      background-color: orange;
+    }
+    .margin-top-10 {
+      margin-top: 10px;
+    }
+    .text-right {
+      text-align: right;
+    }
+    .text-left {
+      text-align: left;
+    }
+    .text-center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>인라인, 블록 레벨 요소</h1>
+  <p>주석을 반드시 확인!</p>
+  <!-- section1 -->
+  <section>
+    <h2>시작 하기 전에, </h2>
+    <li>요소의 높이 설정 해주지 않으면, 일반적으로 컨텐츠 혹은 자식의 크기만큼 가진다.</li>
+    <!-- 아래를 개발자 도구로 찍어보세요! -->
+    <div></div>
+    <span></span>
+    <li>요소의 너비는 설정 해주지 않으면, 일반적으로 부모의 크기만큼 가진다.</li>
+    <div class="w-100">
+      <!-- 아래를 개발자 도구로 찍어보세요! 부모 div의 너비가 100px이죠!-->
+      <div class="div-bg">너비 확인</div>
+    </div>
+  </section>
+  <!-- section2 -->
+  <section id="section2">
+    <h2>블록 요소</h2>
+    <h3>1. 블록 요소의 너비/마진</h3>
+    <!-- 아래를 개발자 도구로 찍어보세요! -->
+    <div class="div-bg">일반적으로 너비의 100%</div>
+    <!-- 아래를 개발자 도구로 찍어보세요! -->
+    <div class="square">너비 지정하면 오른쪽에 자동으로 margin이!</div>
+    <h3>2. 블록의 수평 정렬</h3>
+    <p>블록의 수평정렬은 오른쪽에 자동으로 발생되는 margin을 왼쪽/오른쪽/양쪽으로 나누어서 부여하여 구현합니다.</p>
+    <!-- 아래 3개를 각각 개발자 도구로 찍어보세요! -->
+    <div class="square margin-right-auto">오</div>
+    <div class="square margin-left-auto">왼</div>
+    <div class="square margin-left-auto margin-right-auto">가운데</div>
+    <p>아래의 div는 가운데로 정렬되지 않습니다. </p>
+    <!-- 아래를 개발자 도구로 찍어보세요!
+      가운데 정렬이 되지 않는 이유는
+        해당하는 div에 너비가 주어지지 않아 전체영역을 컨텐츠가 차지하고 있어서,
+        margin이 없기 때문에!
+    -->
+    <div class="div-bg margin-left-auto margin-right-auto">가운데? Nope!</div>
+  </section>
+  <section>
+    <h2>인라인 요소</h2>
+    <h3>1. 인라인 요소의 너비?</h3>
+    <li>너비, 높이, 마진상하를 부여할 수가 없고, 컨텐츠 영역만큼만 가로를 차지함.</li>
+    <!-- 아래를 개발자 도구로 찍어보세요! -->
+    <span class="span-bg">너비 확인</span>
+    <span class="w-100 span-bg">너비 확인</span>
+    <span class="margin-top-10 span-bg">마진 확인</span>
+    <h3>2. 인라인 요소의 수평정렬</h3>
+    <li>부모 요소에 text-align을 부여</li>
+    <!-- 아래를 개발자 도구로 찍어보세요! -->
+    <div class="div-bg text-right">
+      <span>오</span>
+    </div>
+    <div class="div-bg text-left">
+      <span>왼</span>
+    </div>
+    <div class="div-bg text-center">
+      <span>가운데</span>
+    </div>
+    <p>text-align이지만, 텍스트 뿐만 아니라 모든 인라인 요소 정렬을 한다.</p>
+    <div class="div-bg text-center">
+      <img src="https://picsum.photos/200/300" alt="랜덤이미지">
+    </div>
+  </section>
+</body>
+</html>
