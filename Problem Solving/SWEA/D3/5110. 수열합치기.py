@@ -41,7 +41,7 @@ def addList(lst, arr):  #리스트를 추가해야할 경우
     lst.size += len(arr)
 
 def printList(lst):
-    if lst.head is None: return
+    if lst.head is None: return #항상 빈리스트인지 체크하는 습관 들일 것
     cur = lst.head
     while cur is not None:
         print(cur.data, end=' ')
