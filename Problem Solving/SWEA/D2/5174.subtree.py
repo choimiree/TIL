@@ -7,7 +7,6 @@ class Node:
         self.right = None
         self.data = data
 
-
 class Tree:
     def __init__(self, cnt):
         self.node_lst = [None]

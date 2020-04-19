@@ -42,29 +42,26 @@ def addList(lst, arr):  #리스트를 추가해야할 경우
 
 def printList(lst):
     if lst.head is None: return #항상 빈리스트인지 체크하는 습관 들일 것
-    cur = lst.head
-    while cur is not None:
-        print(cur.data, end=' ')
-        cur=cur.next
-    print()
+
+    count_10 = 10
+    if lst.size < 10:
+        count_10 = lst.size
+
+    count = 0
     cur = lst.tail
-    while cur is not None:
+    while count is not count_10:    #문제풀이에 맞게 변형
         print(cur.data, end=' ')
         cur = cur.prev
+        count += 1
     print()
-
-# mylist = LinkedList()
-
-# arr = [1, 3, 5, 7, 9]
-# for val in arr:
-#     addList(mylist, arr)
-# printList(mylist)
 
 T=int(input())
 for tc in range(1, T+1):
     N,M=map(int,input().split())
-    arr = [list(map(int, input().split())) for _ in range(M)]
+    # arr = [list(map(int, input().split())) for _ in range(M)]
     mylist = LinkedList()
-    for i in arr:
-        addList(mylist, arr)
-    print('#{} {}'.format(tc, mylist))
+    for i in range(M):
+        addList(mylist, list(map(int,input().split())))
+
+    print('#{}'.format(tc), end=' ')
+    printList(mylist)
