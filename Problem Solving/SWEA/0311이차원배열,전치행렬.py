@@ -52,7 +52,7 @@ for i in range(2):
             bit[2] = k     #2번째 원소
             for n in range(2):
                 bit[3] = n      #3번째 원소
-                prit(bit)       #생성된 부분집합 출력
+                print(bit)       #생성된 부분집합 출력
 
 #보다 간결하게 부분집합을 생성하는 방법
 arr = [3,6,7,1,5,4]

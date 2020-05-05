@@ -29,9 +29,9 @@ for tc in range(1, T+1):
 
      for i in range(len(r)-1):
          for j in range(i+1, len(r)):
-             if r[i][0]*r[i][1] > r[j][0] * r[j][1]:
+             if r[i][0]*r[i][1] > r[j][0]*r[j][1]:
                  r[i],  r[j] = r[j], r[i]
-             elif r[i][0]*r[i][1] == r[j][0] * r[j][1]:
+             elif r[i][0]*r[i][1] == r[j][0]*r[j][1]:
                  if r[i][0] > r[j][0]:
                      r[i], r[j] = r[j], r[i]
      print('#{} {}'.format(tc, len(r)),end=' ')

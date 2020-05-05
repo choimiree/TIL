@@ -5,7 +5,7 @@
 #점원들이 쌓는 탑은 점원 1명 이상으로 이루어져 있다.
 #탑의 높이는 점원이 1명일 경우 그 점원의 키와 같고, 2명 이상일 경우 탑을 만든 모든 점원의 키의 합과 같다.
 #탑의 높이가 B이상인 경우 선반 위의 물건을 사용할 수 있는데 탑의 높이가 높을 수록 더 위험하므로 높이가 B이상인 탑 중에서 높이가 가장 낮은 탑을 알아내려고 한다.
-'''
+
 #<부분집합> 코드#
 T = int(input())
 for tc in range(1, T+1):
@@ -17,8 +17,8 @@ for tc in range(1, T+1):
         for j in range(N+1):
             if i & (1<<j): #부분집합의 개수 세아려 줌
                 sum += height_ls[j] #부분집합을 다 더해 줌
-        if sum >= B and sum - B <= min: #부분집합의 합이 선반보다 크고, 부분집합의 합-선반의높이가 min일 때
-            min = sum - B #min=부분집합의 합 - 선반의 높이
+        if sum >= B and sum - B <= min: #부분집합의 합이 선반보다 크고, 부분집합의 합-선반의 높이가 min일 때
+            min = sum - B #min = 부분집합의 합 - 선반의 높이
     print('#{} {}'.format(tc, min))
 
 #<재귀함수> 코드#
@@ -42,4 +42,4 @@ for t in range(1, T + 1):
     min_height = 100000
     result = back(0, 0)
     print('#{} {}'.format(t, result))
-'''
+

@@ -31,5 +31,5 @@ for tc in range(1, 11):
         rightcross += pan[i][-i-1]
         result.append(rightcross)
 
-#    result = linesum + rowsum + leftcross + rightcross
+#   result = linesum + rowsum + leftcross + rightcross
     print('#{} {}'.format(tc, max(result)))
