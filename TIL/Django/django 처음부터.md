@@ -1,19 +1,19 @@
 # django 처음부터~
 
-## junoclass 프로젝트 만들기
+## 1. 프로젝트 만들기
 
 ```bash
 $django-admin startproject crud
 ```
 
-## articles/accounts앱 만들기
+## 2. 앱 만들기
 
 ```bash
 $python manage.py startapp articles
 $python manage.py startapp accounts
 ```
 
-## settings.py에 앱 추가
+## 3. settings.py 앱 추가
 
 ```python
 ALLOWED_HOSTS = ['*']
@@ -25,13 +25,13 @@ LANGUAGE_CODE = 'ko-kr'
 TIME_ZONE = 'Asia/Seoul'
 ```
 
-## server 확인
+## 4. server 확인
 
 ```bash
 $ python manage.py runserver 8080
 ```
 
-## articles 앱 model설정
+## 5. articles 앱 model설정
 
 ```python
 from django.db import models
@@ -57,7 +57,7 @@ class Comments(models.Model):
 
 ```
 
-## accounts 앱 model 설정
+## 6. accounts 앱 model 설정
 
 ```python
 from django.db import models
@@ -83,7 +83,7 @@ AUTH_USER_MODEL = 'accounts.User'
 - comment는 article과 1:N관계. 
 - comment는 user랑도 1:N관계
 
-### migrate 한다.
+### migrate
 
 ```bash
 $ python manage.py makemigrations
@@ -100,13 +100,13 @@ user입장에서 모든 comment를 가져오는 것은 'user.comment_set'
 
 user.article_set이 있는데 ''좋아요''하면, user.article_set(many to many field) 생김. 그러면 겹치기 때문에 'related_name'사용.
 
-## admin 관리자 생성
+## 7. admin 관리자 생성
 
 ```bash
 $ python manage.py createsuperuser
 ```
 
-### articles/admin.py에 등록
+### articles/admin.py 등록
 
 ```python
 from django.contrib import admin
@@ -118,7 +118,7 @@ admin.site.register(Comment)
 
 ```
 
-### accounts/admin.py에 등록
+### accounts/admin.py 등록
 
 ```python
 from django.contrib import admin
@@ -131,7 +131,7 @@ admin.site.register(User)
 - admin server에서 작성/수정/삭제 잘 되는지 확인
 - 출력되는 무언가가 있어야하기 때문에 하나 작성해놓는다.
 
-## forms.py
+## 8. forms.py
 
 ```python
 from django import forms
@@ -150,7 +150,7 @@ class CommentForm(forms.ModelForm):
         field = '__all__'
 ```
 
-## junoclass/urls.py
+## 9. 프로젝트/urls.py
 
 ```python
 from django.contrib import admin
@@ -162,7 +162,9 @@ urlpatterns = [
 ]
 ```
 
-## articles/urls.py
+## 10. articles: read
+
+### urls.py
 
 ```python
 from django.urls import path
@@ -177,7 +179,7 @@ urlpatterns = [
 
 - 요청이 가장 먼저 도착하는 곳이 **url**이기 때문에 제일 먼저 짠다.
 
-## articles/views.py
+### views.py
 
 ```python
 from django.shortcuts import render
@@ -199,11 +201,13 @@ def index(request):
 
 ```
 
-## articles에 templates 폴더 만들어준다. 
+## 11. articles에 templates 폴더 생성 
 
 - articles/templates/articles/index.html
 
   (이렇게 한 개 더 안만들어주면 index가 가장 위에꺼로 감(?))
+
+### index.html
 
 ```html
 <!DOCTYPE html>
@@ -236,7 +240,7 @@ def index(request):
 
 
 
-## base.html
+## 12. base.html
 
 ```html
 <!DOCTYPE html>
@@ -277,7 +281,7 @@ DIRS : [os.path.join(BASE_DIR, 'templates')]
 
 
 
-## articles: create
+## 13. articles: create
 
 ### urls.py
 
@@ -451,7 +455,7 @@ request안에 user의 정보가 있기 때문에, article에 user정보를 넣�
 
 
 
-## articles: detail
+## 14. articles: detail
 
 ### urls.py
 
@@ -519,7 +523,7 @@ detail.html로 연결되는 링크 추가
 
 article_pk가 아니라 article.pk! 왜인지 알지?
 
-## articles: update
+## 15. articles: update
 
 ### urls.py
 
@@ -628,7 +632,7 @@ def update(request, article_pk):
 
 유효성에서 튕겨져 나오면, else의 context로 간다. 왜 통과되지 않았는지 에러메시지를 자연스럽게 가지고 나간다!! 따라서, error message를 따로 설정하지 않아도 되는 것.
 
-## articles: delete
+## 16. articles: delete
 
 ### urls.py
 
@@ -654,10 +658,6 @@ def delete(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
     article.delete()
 ```
-
-#### decorator
-
-delete도 POST형식으로 받아야함!
 
 ### detail.html
 
@@ -691,67 +691,164 @@ a태그는 get방식! 따라서 form 태그가 필요함
 {% endblock %}
 ```
 
-:heavy_check_mark: POST일때만 삭제하게(GET방식일 때 삭제할 수 있게하면, url만 조작해서 삭제할 수 있으니까 막는것!)
+:heavy_check_mark: POST일때만 삭제하게(GET방식일 때 삭제할 수 있게하면, url만 조작해서 삭제할 수 있으니까 막는것!) GET은 조회밖에 못한다고 생각하면 됨!
 
-: require POST 위에 import 하고
+#### decorator
 
-![image-20200512193558070](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512193558070.png)
+delete도 POST형식으로 받아야함!
 
-![image-20200512193442554](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512193442554.png)
+```python
+from django.views.decorators.http import require_POST
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Article
+from .forms import ArticleForm
 
-GET은 조회밖에 못한다고 생각하면 됨
+
+@require_POST
+def delete(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    article.delete()
+    return redirect('articles:index')
+```
 
 
 
-- USER CRUD 시작
+>  USER CRUD 시작
 
-:star: user가 본인이 맞는지, 로그인된 유저만 보이게 등등 자잘자잘한게 많아서 어려워보임.
+:star: accounts 계정이 어렵게 느껴지는 이유: user가 본인이 맞는지, 로그인된 user가 맞는지 등등 자잘자잘한게 많아서 어려워보이는 것.
 
-## accounts: 회원가입
+
+
+## 17. accounts: 회원가입
 
 ### project/urls.py
 
-만들고, project/urls.py에도 accounts앱 추가
+```python
+from django.contrib import admin
+from django.urls import path, include
 
-![image-20200512193827161](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512193827161.png)
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('articles/', include('articles.urls')),
+    path('accounts/', include('accounts.urls')),
+]
+```
 
-:heavy_check_mark: user에 관한 앱은 왜 accounts로 하면 좋다고 했게?
+:heavy_check_mark: user에 관한 앱은 왜 `accounts`로 설정하면 좋다고 했게?
 
-decorator에 login_required 기억남? 그거 문서 잘 읽어보면 ![image-20200512194047314](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512194047314.png)
+decorator에 `login_required` 기억남? 그거 문서 잘 읽어보면 ![image-20200512194047314](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512194047314.png)
 
 장고에 auth에 관한 기본값을 accounts로 쓰고 있다. 만약 accounts를 안 쓴다면, 서로 매칭이 안돼서 신경쓸게 많아짐. 그래서 accounts가 아니라 ssafy라고 쓰면 settings에
 
-![image-20200512194324088](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512194324088.png)
+```python
+#settings.py
+LOGIN_URL = '/ssafy/signin/'
+```
 
-일케 바꿔줘야 함.
+이렇게 추가로 적어줘야 됨.
 
 ### accounts/urls.py
 
+```python
+from django.urls import path
+from . import views
 
+app_name = 'accounts'
+
+urlpatterns = [
+    path('signup/', views.signup, name='signup'),
+
+    ]
+```
 
 ### views.py
 
-![image-20200512194842974](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512194842974.png)
+```python
+from django.shortcuts import render
+from django.contrib.auth.forms import UserCreationForm
+
+# Create your views here.
+def signup(request):    #CREATE
+    if request.method == 'POST':
+        pass
+    else:
+        form = UserCreationForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/signup.html', context)
+
+
+```
 
 ### signup.html
 
-![image-20200512194932042](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512194932042.png)
+```html
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>SIGN UP</h1>
+<form action="" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button>회원가입</button>
+</form>
+{% endblock %}
+```
 
 ### base.html
 
-![image-20200512195116428](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512195116428.png)
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <div class='container'>
+        <a href="{% url 'accounts:signup' %}">회원가입</a>
+    </div>
+        {% block content %}
+        {% endblock %}
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+```
 
-회원가입 눌렀을 때 이뤄지는 코드 views.py에 넣어야한다.
+이제 회원가입 눌렀을 때 이뤄지는 코드를 `views.py`에 넣어야한다: `form`이 필요할것! form하고 `유효성검증` 후 `저장`
 
-form이 필요할것! form하고 유효성검증 후 저장
+```python
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
 
-![image-20200512195317618](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512195317618.png)
+# Create your views here.
+def signup(request):    #CREATE
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('articles:index')
+    else:
+        form = UserCreationForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/signup.html', context)
+```
 
-이렇게 하면 attributeError 뜸
+이렇게 하면 `AttributeError` 뜸
 
 ![image-20200512195341238](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512195341238.png)
 
-modelform은 메타정보가 꼭 있다는 말. meta 정보 보면 auth = User에서 user가 우리가 가리키는 user랑 다르기 때문에, modelform에서 user를 고쳐줘야한다.
+:heavy_check_mark: `modelform`은 Meta정보가 꼭 있다는 말. meta 정보 보면 auth = User에서 User가 가리키는 것이 우리가 설정한 User랑 다르기 때문에, modelform에서 User를 고쳐줘야한다.
+
+:heavy_plus_sign: 안바꿔줘도 되는 `form`
 
 ![image-20200512195839497](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512195839497.png)
 
@@ -763,16 +860,43 @@ modelform은 우리가 커스텀한걸로 바꿔줘야한다.
 
 ### accounts/forms.py
 
-일단 기본적으로 만들어져있는 유저크레이션폼을 상속받아서 수정.
+일단 기본적으로 만들어져있는 `UserCreationForm`을 상속받아서 수정.
 
-우리는 유저 가져올때 get_user_model() 형식으로 가져왔다.
+우리는 User 가져올때 `get_user_model()` 형식으로 가져왔다.
 
-![image-20200512200124504](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512200124504.png)
+```python
+from django.contrib.auth.forms import UserCreationForm
+from django.contib.auth import get_user_model
 
-(위에 get_user_model뒤에 ()해줘야 함)
+class CustomUserCreationForm(UserCreationForm):
+    
+    class Meta(UserCreationForm.Meta):
+        model = get_user_model()
+        fields = UserCreationForm.Meta.Fields
+```
 
-기존 유저크레이션폼에서 모델만 바꿨음.
+기존 UserCreationForm에서 model만 바꿨음.
 
-커스텀유저크리에이션 폼을 뷰스에 가져옴
+CustomUserCreationForm을 `views.py`에 가져옴
 
-### views.py![image-20200512200355256](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20200512200355256.png)
+### views.py
+
+```python
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from .forms import CustomUserCreationForm
+
+# Create your views here.
+def signup(request):    #CREATE
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('articles:index')
+    else:
+        form = CustomUserCreationForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/signup.html', context)
+```
