@@ -295,7 +295,7 @@ app_name = 'articles'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('create/', views.create, name='created'),
+    path('create/', views.create, name='create'),
 ]
 ```
 
@@ -657,6 +657,7 @@ urlpatterns = [
 def delete(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
     article.delete()
+    return redirect('articles:index')
 ```
 
 ### detail.html
@@ -866,7 +867,7 @@ modelform은 우리가 커스텀한걸로 바꿔줘야한다.
 
 ```python
 from django.contrib.auth.forms import UserCreationForm
-from django.contib.auth import get_user_model
+from django.contrib.auth import get_user_model
 
 class CustomUserCreationForm(UserCreationForm):
     
@@ -900,3 +901,4 @@ def signup(request):    #CREATE
     }
     return render(request, 'accounts/signup.html', context)
 ```
+
