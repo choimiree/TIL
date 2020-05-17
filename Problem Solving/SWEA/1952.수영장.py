@@ -34,6 +34,7 @@ for tc in range(1, T+1):
     my_cost(0,0)
     print('#{} {}'.format(tc, my_cost))
 
+'''
 #선생님 재귀함수 코드#
 def f(n,s,d,m,m3): #s = my_sum
     global minV
@@ -53,3 +54,4 @@ for tc in range(1, int(input())+1):
     minV = y #1년 이용권 비용
     f(1, 0, d, m, m3) #1월부터 고려
     print('#{} {}'.format(tc, minV))
+'''
