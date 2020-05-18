@@ -141,13 +141,13 @@ class ArticleForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        field = '__all__'
+        fields = '__all__'
 
 class CommentForm(forms.ModelForm):
 
     class Meta:
         model = Comment
-        field = '__all__'
+        fields = '__all__'
 ```
 
 ## 9. 프로젝트/urls.py
@@ -720,6 +720,95 @@ def delete(request, article_pk):
 
 
 
+## :heavy_plus_sign: 댓글
+
+### urls.py
+
+```python
+from django.urls import path
+from . import views
+
+app_name = 'articles'
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('create/', views.create, name='create'),   #GET, POST
+    path('<int:article_pk>/', views.detail, name='detail'),
+    path('<int:article_pk>/update/', views.update, name='update'),  #GET, POST
+    path('<int:article_pk>/delete/', views.delete, name='delete'),
+    path('<int:article_pk>/comments/', views.comments_create, name='comments_create'
+    ]
+```
+
+### views.py
+
+```python
+from ~ require_POST
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Article, Comment
+from .forms import ArticleForm, CommentForm
+
+
+def detail(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    comment_form = CommentForm()
+    #article이 가지고 있는 댓글을 다 가져오는 것
+    comments = article.comment_set.all()
+    context = {
+        'article': article,
+        'comment_form': comment_form,
+        'comments': comments,
+    }
+    return render(request, 'articles/detail.html', context)
+
+@require_POST
+def comments_create(request, article_pk):
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        comment = comment_form.save(commit=False)
+        comment.user = request.user
+        #실제 table의 colum명을 써야하기 때문에 article_id를 써야한다.
+        comment.article_id = article_pk
+        comment.save()
+    return redirect('articles:detail', article_pk)
+```
+
+### detail.html
+
+```html
+{% extends 'base.html' %}
+{% block content %}
+<h1>DETAIL</h1>
+<h2>{{ article.title }}</h2>
+<h2>{{ article.content }}</h2>
+<a href="{% url 'articles:index' %}">back</a>
+<a href="{% url 'articles:update' article.pk %}">UPDATE</a>
+<a href="{% url 'articles:delete' article.pk %}">DELETE</a>
+<form action="{% url 'articles:delete' article.pk %}" method="POST">
+    {% csrf_token %}
+    <button>DELETE</button>
+</form>
+<hr>
+<h3>댓글 목록</h3>
+{% for comment in comments %}
+	<p>{{ comment.user }}: {{ comment.content }}</p>
+{% endfor %}
+<hr>
+
+<h3>댓글작성</h3>
+<form action="{% url 'articles:comments_create' article.pk %}" method = "POST">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button>댓글 작성</button>
+</form>
+{% endblock %}
+```
+
+
+
+
+
 ## 17. accounts: 회원가입
 
 ### project/urls.py
@@ -900,5 +989,438 @@ def signup(request):    #CREATE
         'form': form,
     }
     return render(request, 'accounts/signup.html', context)
+```
+
+
+
+## 18. accounts: 로그인
+
+### accounts/urls.py
+
+```python
+from django.urls import path
+from . import views
+
+app_name = 'accounts'
+
+urlpatterns = [
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login, name='login'),
+
+    ]
+```
+
+### views.py
+
+```python
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import get_user_model()
+from .forms import CustomUserCreationForm
+
+def login(request):	#CREATE(user session)
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
+        if form.is_valid():
+            #세션생성:login
+            auth_login(request, form.get_user())
+            return redirect('articles: index')
+    else:
+        form = AuthenticationForm()
+    context = {
+        'form':form,
+    }
+    return render(request, 'accounts/login.html', context)
+```
+
+### forms.py
+
+```python
+from django import forms
+from .models import Article, Comment
+
+class ArticleForm(forms.ModelForm):
+
+    class Meta:
+        model = Article
+        fields = '__all__'
+
+class CommentForm(forms.ModelForm):
+
+    class Meta:
+        model = Comment
+        #fields = '__all__'
+        fields = ['content',]
+```
+
+### login.html
+
+```html
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>LOGIN</h1>
+<form action="" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button>로그인</button>
+</form>
+{% endblock %}
+```
+
+### base.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <div class='container'>
+        <a href="{% url 'accounts:signup' %}">회원가입</a>
+        <a href="{% url 'accounts:login' %}">로그인</a>
+    </div>
+        {% block content %}
+        {% endblock %}
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+```
+
+## 19. accounts: 로그아웃
+
+### accounts/urls.py
+
+```python
+from django.urls import path
+from . import views
+
+app_name = 'accounts'
+
+urlpatterns = [
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login, name='login'),
+    path('logout/', views.logout, name='logout'),
+    ]
+```
+
+### views.py
+
+```python
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+#from django.contrib.auth import get_user_model()
+from .forms import CustomUserCreationForm
+
+# Create your views here.
+def signup(request):    #CREATE
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)	#modelform은 정보만
+        if form.is_valid():
+            form.save()
+            return redirect('articles:index')
+    else:
+        form = CustomUserCreationForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/signup.html', context)
+
+def login(request):	#CREATE(user session)
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
+        if form.is_valid():
+            #세션생성:login
+            auth_login(request, form.get_user())
+            return redirect('articles:')
+    else:
+        form = AuthenticationForm()
+    context = {
+        'form':form,
+    }
+    return render(request, 'accounts/login.html', context)
+
+def logout(request):	#DELETE(user session)
+    auth_logout(request)
+    return redirect('articles:index')
+    
+```
+
+### base.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <div class='container'>
+        <a href="{% url 'accounts:signup' %}">회원가입</a>
+        <a href="{% url 'accounts:login' %}">로그인</a>
+        <a href="{% url 'accounts:logout' %}">로그아웃</a>
+    </div>
+        {% block content %}
+        {% endblock %}
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+```
+
+### :heavy_plus_sign: 접근 제한
+
+#### `is_authenticated` attribute 사용
+
+#### base.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <div class='container'>
+        {% if user.is_authenticated %}
+            <h1>{{user.username}}님, 안녕하세요!</h1>
+        	<a href="{% url 'accounts:logout' %}">로그아웃</a>
+        {% else %}
+        	<a href="{% url 'accounts:signup' %}">회원가입</a>
+        	<a href="{% url 'accounts:login' %}">로그인</a>
+		{% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+```
+
+#### views.py
+
+```python
+def signup(request):    #CREATE
+    if request.user.is_authenticated:
+        return redirect('articles:index')
+    
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)	#modelform은 정보만
+        if form.is_valid():
+            form.save()
+            return redirect('articles:index')
+    else:
+        form = CustomUserCreationForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/signup.html', context)
+
+def login(request):	#CREATE(user session)
+    if request.user.is_authenticated:
+        return redirect('articles:index')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
+        if form.is_valid():
+            #세션생성:login
+            auth_login(request, form.get_user())
+            return redirect('articles:')
+    else:
+        form = AuthenticationForm()
+    context = {
+        'form':form,
+    }
+    return render(request, 'accounts/login.html', context)
+
+def logout(request):	#DELETE(user session)
+    auth_logout(request)
+    return redirect('articles:index')
+    
+```
+
+### :heavy_plus_sign: 자동 로그인
+
+회원가입을 했다고 해서 로그인이 되는게 아니다
+
+#### views.py
+
+```python
+def signup(request):    #CREATE
+    if request.user.is_authenticated:
+        return redirect('articles:index')
+    
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)	#modelform은 정보만
+        if form.is_valid():
+            user = form.save()
+            #print(form.save()): user정보가 생긴걸 확인할 수 있다.
+            auth_login(request, user)
+            return redirect('articles:index')
+    else:
+        form = CustomUserCreationForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/signup.html', context)
+
+def login(request):	#CREATE(user session)
+    if request.user.is_authenticated:
+        return redirect('articles:index')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
+        if form.is_valid():
+            #세션생성:login
+            auth_login(request, form.get_user())
+            return redirect('articles:index')
+    else:
+        form = AuthenticationForm()
+    context = {
+        'form':form,
+    }
+    return render(request, 'accounts/login.html', context)
+
+def logout(request):	#DELETE(user session)
+    auth_logout(request)
+    return redirect('articles:index')
+    
+```
+
+### :heavy_plus_sign: 인증된 사용자만 작성/수정/삭제할 수 있게
+
+#### index.html
+
+```html
+{% extends 'base.html' %}
+{% block content %}
+<h1>INDEX</h1>
+{% if user.is_authenticated %}
+	<a href="{% url 'articles:create' %}">CREATE</a>
+<hr>
+{% else %}
+	<a href="{% url 'accounts:login' %}">글을 작성하려면 로그인하시오.</a>
+{% endif %}
+<hr>
+{% for article in articles %}
+    <h3>{{ article.title }}</h3>
+    <h4>
+        작성자: {{ article.user }}
+    </h4>
+{% endfor %}
+{% endblock %}
+```
+
+#### `login_required()` decorator 사용
+
+#### create/detail/delete views.py
+
+```python
+from django.shortcuts import render, redirect
+from .models import Article
+from .forms import ArticleForm
+from decorator import logit_required() 
+
+@login_required
+def create(request):
+    if request.method == 'POST':
+        article_form = ArticleForm(request.POST)
+        if article_form.is_valid():
+            article_form.save(commit=False)
+            return redirect('articles:index')
+    else:
+        article_form = ArticleForm()
+    context = {
+        'article_form': article_form,
+    }
+    return render(request, 'articles/create.html', context)
+
+@login_required
+def update(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    if request.method == 'POST':
+        pass
+    else:
+        article_form = ArticleForm()
+    context = {
+        'article_form': article_form,
+    }
+    return render(request, 'articles/update.html', context)
+
+#@login_required
+@require_POST
+def delete(request, article_pk):
+    if user.is_authenticated:
+	    article = get_object_or_404(Article, pk=article_pk)
+    	article.delete()
+    return redirect('articles:index')
+```
+
+:heavy_check_mark: `is_authenticated`와 `login_required()`의 차이
+
+`is_authenticated`는 next 처리를 할 수 없고, 어디론가 되돌리는 것만 가능하다.
+
+:heavy_check_mark: @login_required 랑 @require_POST 같이 쓸 수 없는 이유!
+
+**비로그인 상태 DELETE  요청(POST) **
+
+**-> 로그인 검증(@login_required) **
+
+**-> 로그인 페이지로 리다이렌트(next='/articles/delete/') **
+
+**-> 로그인 성공 **
+
+**-> next 주소로 redirect (GET)**
+
+**-> GET요청으로 next 파라미터 처리 **
+
+**-> @required_POST **
+
+**-> 405 Method Not Allowed**
+
+
+
+#### login_views.py
+
+```python
+def login(request):	#CREATE(user session)
+    if request.user.is_authenticated:
+        return redirect('articles:index')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
+        if form.is_valid():
+            #세션생성:login
+            auth_login(request, form.get_user())
+            #print(request.GET)
+            return redirect(request.GET.get('next' or 'articles:index')
+    else:
+        form = AuthenticationForm()
+    context = {
+        'form':form,
+    }
+    return render(request, 'accounts/login.html', context)
 ```
 
