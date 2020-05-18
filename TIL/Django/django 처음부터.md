@@ -110,11 +110,11 @@ $ python manage.py createsuperuser
 
 ```python
 from django.contrib import admin
-from .models import Article, Comment
+from .models import Article, Comments
 
 
 admin.site.register(Article)
-admin.site.register(Comment)
+admin.site.register(Comments)
 
 ```
 
@@ -122,7 +122,7 @@ admin.site.register(Comment)
 
 ```python
 from django.contrib import admin
-from .models import USer
+from .models import User
 
 
 admin.site.register(User)
@@ -135,7 +135,7 @@ admin.site.register(User)
 
 ```python
 from django import forms
-from .models import Article, Comment
+from .models import Article, Comments
 
 class ArticleForm(forms.ModelForm):
 
@@ -143,10 +143,11 @@ class ArticleForm(forms.ModelForm):
         model = Article
         fields = '__all__'
 
+
 class CommentForm(forms.ModelForm):
 
     class Meta:
-        model = Comment
+        model = Comments
         fields = '__all__'
 ```
 
@@ -379,7 +380,7 @@ def create(request):
 
 ```python
 from django import forms
-from .models import Article, Comment
+from .models import Article, Comments
 
 
 class ArticleForm(forms.ModelForm):
@@ -393,7 +394,7 @@ class ArticleForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
 
     class Meta:
-        model = Comment
+        model = Comments
         fields = '__all__'
 ```
 
@@ -439,9 +440,9 @@ def create(request):
     if request.method == 'POST':
         article_form = ArticleForm(request.POST)
         if article_form.is_valid():
-            article_form.save(commit=False)
-            article.user = request.user
-            article.save()
+            article_form = article_form.save(commit=False)
+            article_form.user = request.user
+            article_form.save()
             return redirect('articles:index')
     else:
         article_form = ArticleForm()
@@ -621,7 +622,7 @@ def update(request, article_pk):
         article_form = ArticleForm(request.POST, instance=article)
         if article_form.is_valid():
             article_form.save()
-            return redirect('article:detail', article.pk)
+            return redirect('articles:detail', article.pk)
     else:
         article_form = ArticleForm()
     context = {
@@ -714,12 +715,6 @@ def delete(request, article_pk):
 
 
 
->  USER CRUD 시작
-
-:star: accounts 계정이 어렵게 느껴지는 이유: user가 본인이 맞는지, 로그인된 user가 맞는지 등등 자잘자잘한게 많아서 어려워보이는 것.
-
-
-
 ## :heavy_plus_sign: 댓글
 
 ### urls.py
@@ -736,7 +731,7 @@ urlpatterns = [
     path('<int:article_pk>/', views.detail, name='detail'),
     path('<int:article_pk>/update/', views.update, name='update'),  #GET, POST
     path('<int:article_pk>/delete/', views.delete, name='delete'),
-    path('<int:article_pk>/comments/', views.comments_create, name='comments_create'
+    path('<int:article_pk>/comments/', views.comments_create, name='comments_create'),
     ]
 ```
 
@@ -754,7 +749,7 @@ def detail(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
     comment_form = CommentForm()
     #article이 가지고 있는 댓글을 다 가져오는 것
-    comments = article.comment_set.all()
+    comments = article.comments_set.all()
     context = {
         'article': article,
         'comment_form': comment_form,
@@ -772,6 +767,28 @@ def comments_create(request, article_pk):
         comment.article_id = article_pk
         comment.save()
     return redirect('articles:detail', article_pk)
+```
+
+### forms.py
+
+```python
+from django import forms
+from .models import Article, Comments
+
+
+class ArticleForm(forms.ModelForm):
+
+    class Meta:
+        model = Article
+        # fields = '__all__'
+        fields = ['title', 'content',]
+
+
+class CommentForm(forms.ModelForm):
+
+    class Meta:
+        model = Comments
+        fields = ['content']
 ```
 
 ### detail.html
@@ -806,6 +823,10 @@ def comments_create(request, article_pk):
 ```
 
 
+
+>  USER CRUD 시작
+
+:star: accounts 계정이 어렵게 느껴지는 이유: user가 본인이 맞는지, 로그인된 user가 맞는지 등등 자잘자잘한게 많아서 어려워보이는 것.
 
 
 
@@ -962,7 +983,7 @@ class CustomUserCreationForm(UserCreationForm):
     
     class Meta(UserCreationForm.Meta):
         model = get_user_model()
-        fields = UserCreationForm.Meta.Fields
+        fields = UserCreationForm.Meta.fields
 ```
 
 기존 UserCreationForm에서 model만 바꿨음.
@@ -1025,7 +1046,7 @@ def login(request):	#CREATE(user session)
         if form.is_valid():
             #세션생성:login
             auth_login(request, form.get_user())
-            return redirect('articles: index')
+            return redirect('articles:index')
     else:
         form = AuthenticationForm()
     context = {
@@ -1034,24 +1055,9 @@ def login(request):	#CREATE(user session)
     return render(request, 'accounts/login.html', context)
 ```
 
-### forms.py
+```
 
-```python
-from django import forms
-from .models import Article, Comment
 
-class ArticleForm(forms.ModelForm):
-
-    class Meta:
-        model = Article
-        fields = '__all__'
-
-class CommentForm(forms.ModelForm):
-
-    class Meta:
-        model = Comment
-        #fields = '__all__'
-        fields = ['content',]
 ```
 
 ### login.html
@@ -1125,7 +1131,7 @@ from .forms import CustomUserCreationForm
 # Create your views here.
 def signup(request):    #CREATE
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)	#modelform은 정보만
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('articles:index')
@@ -1136,13 +1142,14 @@ def signup(request):    #CREATE
     }
     return render(request, 'accounts/signup.html', context)
 
+
 def login(request):	#CREATE(user session)
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
         if form.is_valid():
             #세션생성:login
             auth_login(request, form.get_user())
-            return redirect('articles:')
+            return redirect('articles:index')
     else:
         form = AuthenticationForm()
     context = {
@@ -1150,10 +1157,10 @@ def login(request):	#CREATE(user session)
     }
     return render(request, 'accounts/login.html', context)
 
+
 def logout(request):	#DELETE(user session)
     auth_logout(request)
     return redirect('articles:index')
-    
 ```
 
 ### base.html
@@ -1222,12 +1229,20 @@ def logout(request):	#DELETE(user session)
 #### views.py
 
 ```python
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+#from django.contrib.auth import get_user_model()
+from .forms import CustomUserCreationForm
+
+# Create your views here.
 def signup(request):    #CREATE
     if request.user.is_authenticated:
         return redirect('articles:index')
-    
+
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)	#modelform은 정보만
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('articles:index')
@@ -1238,16 +1253,16 @@ def signup(request):    #CREATE
     }
     return render(request, 'accounts/signup.html', context)
 
+
 def login(request):	#CREATE(user session)
     if request.user.is_authenticated:
         return redirect('articles:index')
-    
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
         if form.is_valid():
             #세션생성:login
             auth_login(request, form.get_user())
-            return redirect('articles:')
+            return redirect('articles:index')
     else:
         form = AuthenticationForm()
     context = {
@@ -1255,10 +1270,10 @@ def login(request):	#CREATE(user session)
     }
     return render(request, 'accounts/login.html', context)
 
+
 def logout(request):	#DELETE(user session)
     auth_logout(request)
     return redirect('articles:index')
-    
 ```
 
 ### :heavy_plus_sign: 자동 로그인
@@ -1338,10 +1353,11 @@ def logout(request):	#DELETE(user session)
 #### create/detail/delete views.py
 
 ```python
-from django.shortcuts import render, redirect
-from .models import Article
-from .forms import ArticleForm
-from decorator import logit_required() 
+from django.views.decorators.http import require_POST
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Article, Comments
+from .forms import ArticleForm, CommentForm
 
 @login_required
 def create(request):
@@ -1388,7 +1404,7 @@ def delete(request, article_pk):
 
 **-> 로그인 검증(@login_required) **
 
-**-> 로그인 페이지로 리다이렌트(next='/articles/delete/') **
+**-> 로그인 페이지로 리다이렉트(next='/articles/delete/') **
 
 **-> 로그인 성공 **
 
@@ -1408,14 +1424,14 @@ def delete(request, article_pk):
 def login(request):	#CREATE(user session)
     if request.user.is_authenticated:
         return redirect('articles:index')
-    
+
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)	#form은 request.POST형태로
         if form.is_valid():
             #세션생성:login
             auth_login(request, form.get_user())
             #print(request.GET)
-            return redirect(request.GET.get('next' or 'articles:index')
+            return redirect(request.GET.get('next') or 'articles:index')
     else:
         form = AuthenticationForm()
     context = {
