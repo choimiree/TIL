@@ -1440,3 +1440,348 @@ def login(request):	#CREATE(user session)
     return render(request, 'accounts/login.html', context)
 ```
 
+
+
+## 20. 좋아요 기능
+
+### articles /model
+
+```python
+from django.db import models
+from django.conf import settings
+
+# Create your models here.
+class Article(models.Model):
+    title=models.CharField(max_length=30)
+    content=models.TextField()
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    user=models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+ like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='like_articles')	#related_name 필수!
+
+
+class Comments(models.Model):
+    content=models.TextField()
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    article=models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')	#related_name 필수는 아님!
+    user=models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+
+
+```
+
+#### 역참조
+
+- 무조건 `ManyToManyField`에서 쓰는 건 아니다.
+- 필수 아니고 상황에 따라 다르다!
+
+https://docs.djangoproject.com/en/2.1/ref/models/fields/#manytomanyfield
+
+https://docs.djangoproject.com/en/2.1/ref/models/relations/#django.db.models.fields.related.RelatedManager
+
+```
+
+#게시글의 좋아요를 누른 모든 유저(참조)
+article.like_users.all()
+#유저가 좋아요를 누른 모든 게시글(역참조)
+user.article_set.all() error!
+
+#게시글을 작성한 유저(참조)
+article.user
+#유저가 작성한 게시글(역참조)
+user.article_set.
+```
+
+### DB 초기화/migrate
+
+```bash
+db.sqlite3 삭제
+0001.migrate 삭제 후,
+$python manage.py makemigrations
+$python manage.py migrate
+```
+
+### admin 생성
+
+```bash
+$python manage.py createsuperuser
+```
+
+:heavy_check_mark:  `ManyToManyField` 특징: 중개 테이블(중개 모델)로 생성됨. (Article, Comment 모델엔 아무것도 생성되지 않는다.)
+
+### articles/urls.py
+
+```python
+from django.urls import path
+from . import views
+
+app_name = 'articles'
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('create/', views.create, name='create'),   #GET, POST
+    path('<int:article_pk>/', views.detail, name='detail'),
+    path('<int:article_pk>/update/', views.update, name='update'),  #GET, POST
+    path('<int:article_pk>/delete/', views.delete, name='delete'),
+    path('<int:article_pk>/comments/', views.comments_create, name='comments_create'),
+    path('<int:article_pk>/like/', views.like, name='like'),
+    ]
+```
+
+### views.py
+
+```python
+from ~ require_POST
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Article, Comment
+from .forms import ArticleForm, CommentForm
+
+
+@login_required
+def like(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    user = request.user
+
+	#exists(): 최소한 하나의 레코드가 존재하는지 여부를 확인하여 알려준다.
+    if article.like_users.filter(pk=user.pk).exists():
+        article.like_users.remove(user)
+    else:
+        article.like_users.add(user)
+    return redirect('articles:index')
+
+    #해당 게시글에 좋아요를 누른 사람들 중에서 현재 접속 유저가 있는지 없는지
+    #있으면 좋아요 취소!
+#    if request.user in article.like_users.all():
+       # article.like_users.remove(request.user)
+#    else:
+       # article.like_users.add(request.user)
+#    return redirect('articles:index')
+```
+
+### index.html
+
+```html
+{% extends 'base.html' %}
+{% block content %}
+<h1>INDEX</h1>
+{% if user.is_authenticated %}
+	<a href="{% url 'articles:create' %}">CREATE</a>
+<hr>
+{% else %}
+	<a href="{% url 'accounts:login' %}">글을 작성하려면 로그인하시오.</a>
+{% endif %}
+<hr>
+{% for article in articles %}
+    <h3>{{ article.title }}</h3>
+    <h4>
+        작성자: {{ article.user }}
+    </h4>
+	<a href="{% url 'articles:detail' article.pk %}">DETAIL</a><br>
+	{% if request.user in article.like_users.all %}
+		<a href="{% url 'articles:like' article.pk %}">좋아요 취소</a><br>
+	{% else %}
+		<a href="{% url 'articles:like' article.pk %}">좋아요</a><br>
+	{% endif %}
+	{{ article.like_users.count }}명이 좋아합니다. <br>
+	{{ article.like_users.all|length }}명이 좋아합니다.
+	<hr>
+{% endfor %}
+{% endblock %}
+```
+
+
+
+## 21. 팔로우 기능?
+
+### accounts /urls.py
+
+```python
+from django.urls import path
+from . import views
+
+app_name = 'accounts'
+
+urlpatterns = [
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login, name='login'),
+    path('logout/', views.logout, name='logout'),
+    path('<username>/', views.detail, name='detail'),
+    ]	#맨밑에 써줘야함
+```
+
+### accounts /views.py
+
+```python
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import get_user_model()
+from .forms import CustomUserCreationForm
+
+def detail(request, username):
+    User = get_user_model()
+    user = get_object_or_400(User, username=username)
+    context = {
+        'user': user,
+    }
+    return render(request, 'accounts/detail.html', context)
+```
+
+:heavy_check_mark:
+
+get_user() : user 클래스 전체
+
+form.get_user(): form이라는 instance에서 사용할 수 있는 것 중 하나. 
+
+get_user_model(): models.py에 정의했던 class를 가져오는 것.
+
+
+
+### accounts /detail.html
+
+```html
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ user.username }}의 프로필</h1>
+<hr>
+<h2>좋아요를 누른 게시글</h2>
+{% for article in user.like_articles.all %}
+	<p>제목: {{ article.title }}</p>
+{% endfor %}
+{% endblock %}
+```
+
+### accounts/models.py
+
+```python
+from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    followers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='followings')
+    
+```
+
+```bash
+$ python manage.py makemigrations
+$ python manage.py migrate
+```
+
+:heavy_check_mark: `get_user_model()` 대신 `settings.AUTH_USER_MODEL` 쓰는 이유
+
+- `settings.AUTH_USER_MODEL` : return 'accounts.User' (str), 이건 str
+
+- `get_user_model()` : return User object (object), 똑같은 User model을 뜻하지만 이건 class
+
+=> **User 참조할 때, **
+
+**models.py에서만 settings.AUTH_USER_MODEL**
+
+**나머지 다른 곳에서는 get_user_model()**
+
+https://docs.djangoproject.com/ko/2.1/topics/auth/default/#user-objects
+
+
+
+### accounts /urls.py
+
+```python
+from django.urls import path
+from . import views
+
+app_name = 'accounts'
+
+urlpatterns = [
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login, name='login'),
+    path('logout/', views.logout, name='logout'),
+    path('<username>/', views.detail, name='detail'),#맨밑에 써줘야함
+    path('<username>/follow/', views.follow, name='follow'),
+    ]	
+```
+
+### accounts /views.py
+
+```python
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import get_user_model()
+from .forms import CustomUserCreationForm
+
+
+def follow(request, username):
+    me = request.user // 접속 중인 user
+    you = get_object_or_404(get_user_model(), username=username)	#프로필 user
+    
+    #현재 프로필 user의 팔로워들 중에 내가 있는지 없는지 판단
+    #if me in you.followers.all():
+    #내가 너를 이미 팔로우하고 있다면
+    if you.followers.filter(pk=me.pk).exists():
+        you.followers.remove(me)
+    else:
+        you.followers.add(me)
+    return redirect('accounts:detail', username)
+        
+```
+
+### accounts /detail.html
+
+```html
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ user.username }}의 프로필</h1>
+<hr>
+<h2>좋아요를 누른 게시글</h2>
+{% for article in user.like_articles.all %}
+	<p>제목: {{ article.title }}</p>
+{% endfor %}
+<hr>
+{% if request.user != user %}
+    {% if request.user in user.followers.all %}
+        <a href="{% url 'accounts:follow' user.username %}">언팔로우</a>
+    {% else %}
+        <a href="{% url 'accounts:follow' user.username %}">팔로우</a>
+    {% endif %}
+{% endif %}
+<hr>
+<h3>
+    {{ user.username }}을 팔로우 하는 인원수
+</h3>
+<p>
+    {{ user.followers.count }}명
+</p>
+
+<h3>
+    {{ user.username }}이 팔로잉 하는 인원수
+</h3>
+<p>
+    {{ user.followings.count
+ }}명
+</p>
+
+{% endblock %}
+```
+
+###  base.html
+
+```html
+<body>
+    <div class="container">
+        {% if user.is_authenticated %}
+            <h1>{{ request.user.username }}님, 안녕하세요!</h1>
+            <a href="{% url 'accounts:logout' %}">로그아웃</a>
+        {% else %}
+            <a href="{% url 'accounts:signup' %}">회원가입</a>
+
+```
+
+
+
+*작성자의 프로필을 눌렀을때 그 프로필로 가는 것 추가해보기!!*
+
