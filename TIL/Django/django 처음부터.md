@@ -1783,5 +1783,77 @@ def follow(request, username):
 
 
 
-*작성자의 프로필을 눌렀을때 그 프로필로 가는 것 추가해보기!!*
+>  *작성자의 프로필을 눌렀을때 그 프로필로 가는 것 추가해보기!!*
+
+
+
+## 22. custom filter with gravatar
+
+### accounts/forms.py
+
+```python
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model
+
+class CustomUserCreationForm(UserCreationForm):
+
+    class Meta(UserCreationForm.Meta):
+        model = get_user_model()
+        fields = UserCreationForm.Meta.fields + ('email',)
+```
+
+### articles/templatetags/gravatar.py
+
+```python
+import hashlib
+from django import template
+from django.template.defaultfilters import stringfilter
+
+register = template.Library()   #기존 탬플릿 라이브러리에
+
+@register.filter    #아래의 함수를 필터로 추가한다.
+@stringfilter   
+def makemd5(email):  
+    return hashlib.md5(email.strip().lower().encode('utf-8')).hexdigest()
+    
+    
+# {% load gravatar %}
+# {{ test|lower }} #-> text.lower()
+```
+
+### templates/base.html
+
+```html
+{% load gravatar %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <div class='container'>
+        #{% if user.is_authenticated %}
+        {% if request.user.is_authenticated %}
+            <img src="https://s.gravatar.com/avatar/{{request.user.email|makemd5 }}s=80" alt="profile-img">
+            <h1>{{user.username}}님, 안녕하세요!</h1>
+        	<a href="{% url 'accounts:logout' %}">로그아웃</a>
+        {% else %}
+        	<a href="{% url 'accounts:signup' %}">회원가입</a>
+        	<a href="{% url 'accounts:login' %}">로그인</a>
+		{% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+```
 
