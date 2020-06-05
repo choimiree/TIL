@@ -44,10 +44,10 @@
 
 
 
-### route 등록 단계
+### router 등록 단계
 
 1. views의 컴포넌트 생성(.vue)
-2. router/index.js에 route를 등록
+2. router/index.js에 router를 등록
 3. App.vue에 router-link 작성
 
 
