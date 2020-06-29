@@ -1,6 +1,6 @@
 def f(n,k,s):   #n은 순열의 인덱스, s는 생성된 부분까지의 합
     global minV
-    if n == N:  #순열이 완성된 경우
+    if n == k:  #순열이 완성된 경우, 모든 행에서 선택한 경우
         if minV>s:  #기존의 최소값보다 작으면
             minV=s
         return
@@ -8,10 +8,10 @@ def f(n,k,s):   #n은 순열의 인덱스, s는 생성된 부분까지의 합
         return
     else:
         for i in range(k):  #순열의 n번 인덱스에 들어갈 숫자 선택
-            if u[i] === 0:
-                u[i] = 1
-                find(n+1, k, s+m[n][i])
-                u[i] = 0
+            if used[i] == 0:
+                used[i] = 1
+                f(n+1, k, s+A[n][i])
+                used[i] = 0
             return
 
 T = int(input())

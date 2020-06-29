@@ -22,7 +22,7 @@ for tc in range(1,T+1):
     for _ in range(E):
         n1, n2 = map(int, input().split())
         adj[n1].append(n2)  #방향 그래프
-        adn[n2].append(n1) #방향 없는 그래프면 이 과정 추가!
+        adj[n2].append(n1) #방향 없는 그래프면 이 과정 추가!
     start, end = map(int, input().split())
     print('#{} {}'.format(tc, dfs(V,start,end))) #1~V까지 노드가 있고, start~end까지 탐색해서 결과를 내달라는 말.
 
