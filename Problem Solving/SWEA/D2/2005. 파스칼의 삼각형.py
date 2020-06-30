@@ -10,15 +10,46 @@
 # 1 3 3 1
 # 파스칼의 삼각형의 크기 N은 1이상 10이하의 정수이다.
 
-T =int(input())
-for tc in range(1,T+1):
-    N=int(input())
+# T =int(input())
+# for tc in range(1,T+1):
+#     N=int(input())
+#     print('#{}'.format(tc))
+#     pascal = [[1] * i for i in range(1,N+1)]
+#     # print(pascal)
+#     for j in range(2, len(pascal)):
+#         for k in range(1, len(pascal[j])-1):
+#             pascal[j][k] = pascal[j-1][k-1] + pascal[j-1][k]
+#     for m in range(N):
+#         for n in range(len(pascal[m])):
+#             print(pascal[m][n], end=' ')
+#         print()
+
+
+T=int(input())
+for tc in range(1, T+1):
     print('#{}'.format(tc))
-    pascal = [[1] * i for i in range(1,N+1)]
+    N=int(input())
+    pascal = [[1]*i for i in range(1, N+1)]
+    # print(pascal)
     for j in range(2, len(pascal)):
         for k in range(1, len(pascal[j])-1):
             pascal[j][k] = pascal[j-1][k-1] + pascal[j-1][k]
+            # print(pascal)
     for m in range(N):
         for n in range(len(pascal[m])):
             print(pascal[m][n], end=' ')
         print()
+
+
+
+
+
+
+
+
+
+
+
+
+
+

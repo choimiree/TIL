@@ -3,11 +3,15 @@
 #카드 장수가 같을 때는 적힌 숫자가 큰 쪽을 출력한다.
 for tc in range(1, int(input())+1):
     N=int(input())
-    num=list(str(input()))
+    num=list(map(int, input()))
+    cnt=[0]*10
     for i in num:
-        #N개의 숫자 중에 중복되는 수가 있는지 확인
+        #num 리스트에 있는 숫자는 cnt +1
+        cnt[i] += 1
+    #cnt 수가 많을 수록 카드가 많다는 뜻이므로 최대값이 결과값이 됨.
+    result = max(cnt)
 
-    card_num=0
-    numbers=0
-
-    print('#{} {}'.format(tc, card_num, numbers))
+    for j in range(len(cnt)):
+        if cnt[j] == result:
+            a = j
+    print('#{} {} {}'.format(tc, a, result))

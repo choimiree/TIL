@@ -1,3 +1,4 @@
+#내방식 아님
 #행 우선, 열 우선, 3x3 사각 영역
 def lineCheck():
     for i in range(9):
