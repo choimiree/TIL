@@ -7,10 +7,12 @@ for tc in range(1, T+1):
     str1 = input()
     str2 = input()
     count_lst = [0 for _ in range(len(str1))]
+    # print(count_lst)
     for i in str2:
         for j in range(len(str1)):
             if str1[j] == i:
                 count_lst[j] += 1
+    # print(count_lst)
     max_N = 0
     for k in count_lst:
         if k > max_N:

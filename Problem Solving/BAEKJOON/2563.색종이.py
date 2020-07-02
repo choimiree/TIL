@@ -5,6 +5,7 @@
 # [입력]
 # 첫째줄에 색종이의 수가 주어진다.
 # 한 줄에 하나씩 색종이를 붙인 위치가 주어진다.
+'''
 N=int(input())
 arr = [list(map(int,input().split())) for _ in range(N)]
 paper = [[0]*100 for _ in range(100)] # 빈 도화지
@@ -20,3 +21,21 @@ for i in range(len(paper)):     #색종이가 붙은 칸 세기
             cnt += 1    #1인 것 다 합쳐줌
 
 print("{}".format(cnt))
+'''
+# 가로세로 100인 정사각형 흰색 도화지
+# 가로세로 10인 정사각형 색종이 붙인다.
+# 색종이가 붙은 검은 영역넓이 구하라.
+pan=[[0]*100 for _ in range(100)]
+N=int(input())
+for _ in range(N):
+    x, y = map(int,input().split())
+    #x는 x 시작 좌표, y는 y 시작 좌표
+    for i in range(x, x+10):
+        for j in range(y, y+10):
+            # print(i,j)
+            pan[i][j] = 1
+            # print(pan[i][j])
+result=0
+for x in range(100):
+    result += sum(pan[x])
+print(result)
