@@ -35,32 +35,27 @@
 # result = Mdmax * Ndmax    #그 중에서 최대값을 구하고 각각 곱하면 정답.
 # print(result)
 
-
-
-
-
-
-
-
 N,M=map(int,input().split())    #가로길이, 세로길이
+A = [0] + [N]  # 가로리스트
+B = [0] + [M]  # 세로리스트
 Num = int(input())  #점선의 개수
 for _ in range(Num):    #점선의 개수만큼 가로(0), 세로(1) 좌표번호
     w, z = map(int,input().split())
     #가로인지 세로인지 판단해서 가로리스트 세로리스트에 넣음
-    A = [0] + [N]   #가로리스트
-    Mls = [0] + [M] #세로리스트
-    #가로리스트에 세로점선
-    if w == 1:
-        A.append(z)
+    if w == 1:#가로리스트에 세로점선
+        A += [z]
     else:   #세로리스트에 가로점선 넣는다.
-        B.append(z)
-    #가로리스트의 인덱스값끼리의 차이가 가장 큰것 찾고
-    r=[]
-    for i in range(1, len(A)+1):
-        r.append(max())
-    #세로리스트의 인덱스값끼리의 차이가 가장 큰것 찾아서
-    #가로세로길이 곱해주면 가장 큰 넓이 구할 수 있음
-
+        B += [z]
+A_max, B_max = 0,0
+A, B = sorted(A), sorted(B)
+#가로리스트의 인덱스값끼리의 차이가 가장 큰것 찾아야 됨
+for i in range(1, len(A)):
+    A_max = max(A_max, A[i]-A[i-1])
+#세로리스트의 인덱스값끼리의 차이가 가장 큰것 찾아서
+for j in range(1, len(B)):
+    B_max = max(B_max, B[j]-B[j-1])
+#가로세로길이 곱해주면 가장 큰 넓이 구할 수 있음
+print(A_max*B_max)
 
 
 
